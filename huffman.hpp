@@ -119,22 +119,6 @@ public:
 		return encode;
 	}
 
-	//vector<bool> boolVector(const vector<string> code)
-	//{
-	//	vector<bool> compress;
-	//	for (int i = 0; i < code.size(); i++)
-	//	{
-	//		for (int j = 0; j < code[i].size(); j++)
-	//		{
-	//			if(code[i][j]== '0')
-	//				compress.push_back(0);
-	//			else if(code[i][j]== '1')
-	//				compress.push_back(1);
-	//		}
-	//	}
-	//	return compress;
-	//}
-
 	string compress(const string code)
 	{
 		string compressed;
@@ -146,7 +130,9 @@ public:
 			if (str.size() == 8)
 			{
 				int dec = bitset<8>(str).to_ulong();
-				compressed.push_back(char(dec));
+				unsigned char chr = (unsigned char)dec;
+
+				compressed.push_back(chr);
 				str.clear();
 			}
 		}
@@ -234,6 +220,7 @@ public:
 		}
 		return result;
 	}
+
 	string decode()
 	{
 		string str;
@@ -244,15 +231,68 @@ public:
 		{
 			in_file.get(id);
 		}
-
+	
 		while (!in_file.eof())
 		{
 			in_file.get(id);
-
+	
 			str += decimal_to_binary(int(id));
 		}
 		return str;
 	}
+
+	void decompress(node_ptr node, string code)
+	{
+		recalculate_huffman_codes();
+		out_file.open("decoded.txt");
+
+		int i = 0;
+		while (i < code.size())
+		{
+			node_ptr current = node;
+
+			while ((node->right != NULL && node->left != NULL) && i < code.size())
+			{
+				if (code[i] == '0')
+				{
+					current = current->left;
+					++i;
+				}
+				else if (code[i] == '1')
+				{
+					current = current->right;
+					++i;
+				}
+			}
+			out_file << current->id;
+		}
+		out_file.close();
+	}
+
+	void backToOriginal()
+	{
+		recalculate_huffman_codes();
+		decompress(root, decode());
+	}
+
+	//string DecToBin(const char code)
+	//{
+	//	string binary = bitset<8>(code).to_string();
+	//	return binary;
+	//}
+	//
+	//static vector<char> ReadAllBytes(char const *filename)
+	//{
+	//	ifstream ifs(filename, ios::binary | ios::ate);
+	//	ifstream::pos_type pos = ifs.tellg();
+	//
+	//	std::vector<char> result(pos);
+	//
+	//	ifs.seekg(0, ios::beg);
+	//	ifs.read(&result[0], pos);
+	//
+	//	return result;
+	//}
 };
 
 #endif
