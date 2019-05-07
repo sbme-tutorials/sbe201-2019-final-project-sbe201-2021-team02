@@ -28,7 +28,7 @@ class huffman
 protected:
 	ifstream in_file;
 	ofstream out_file;
-	node_ptr child, parent, root;
+	node_ptr root;
 	char id;
 
 	class compare
@@ -104,6 +104,7 @@ public:
 	{
 		string encode;
 		create_pq();
+		typedef huffman_node *node_ptr;
 		create_huffman_tree();
 		calculate_huffman_codes();
 		in_file.open(in_file_name, ios::in);
@@ -155,18 +156,102 @@ public:
 	void printTotxt(const string compressed)
 	{
 		out_file.open("encoded.txt");
-		map<char,int> :: iterator it= charFreq.begin();
-		for (it; it!=charFreq.end(); it++)
+		map<char, int>::iterator it = charFreq.begin();
+		for (it; it != charFreq.end(); it++)
 		{
 			out_file << it->first;
+			out_file << '%';
 			out_file << it->second;
+			out_file << '^';
 		}
-		
+
+		out_file << '$';
+
 		for (int i = 0; i < compressed.size(); i++)
 		{
 			out_file << compressed[i];
 		}
 		out_file.close();
+	}
+
+	map<char, int> getMap()
+	{
+		map<char, int> freqMAp;
+		string v;
+		v.clear();
+		char k;
+		in_file.open(in_file_name, ios::in);
+		in_file.get(id);
+		while (id != '$')
+		{
+			while (id != '%')
+			{
+				k = id;
+				in_file.get(id);
+			}
+			while (id != '^')
+			{
+				v += id;
+				in_file.get(id);
+			}
+			int freq = stoi(v);
+			freqMAp.insert(pair<char, int>(k, freq));
+			v.clear();
+			in_file.get(id);
+		}
+		in_file.close();
+
+		return freqMAp;
+	}
+
+	void recalculate_huffman_codes()
+	{
+		map<char, int> freqMap = getMap();
+		for (auto &[k, v] : freqMap)
+		{
+			node_ptr temp = new huffman_node;
+			temp->id = k;
+			temp->freq = v;
+			pq.push(temp);
+		}
+		create_huffman_tree();
+		calculate_huffman_codes();
+	}
+
+	string decimal_to_binary(int in)
+	{
+		string temp = "";
+		string result = "";
+		while (in)
+		{
+			temp += ('0' + in % 2);
+			in /= 2;
+		}
+		result.append(8 - temp.size(), '0'); //append '0' ahead to let the result become fixed length of 8
+		for (int i = temp.size() - 1; i >= 0; i--)
+		{
+			result += temp[i];
+		}
+		return result;
+	}
+	string decode()
+	{
+		string str;
+		str.clear();
+		in_file.open(in_file_name, ios::in);
+		in_file.get(id);
+		while (id != '$')
+		{
+			in_file.get(id);
+		}
+
+		while (!in_file.eof())
+		{
+			in_file.get(id);
+
+			str += decimal_to_binary(int(id));
+		}
+		return str;
 	}
 };
 
