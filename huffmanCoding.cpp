@@ -11,11 +11,13 @@ int main(int argc, char *argv[])
 	}
     huffman h;
     h.in_file_name= argv[1];
-    vector<string> code= h.encode();
+    string code= h.encode();
 	for (int i = 0; i < code.size(); i++)
     {
         cout<< code[i];
     }
+	cout<<h.compress(code);
+	h.printTotxt(h.compress(code));
     
 	return 0;
 }

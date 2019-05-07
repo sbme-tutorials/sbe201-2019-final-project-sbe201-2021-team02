@@ -5,6 +5,7 @@
 #include <vector>
 #include <fstream>
 #include <map>
+#include <bitset>
 using namespace std;
 
 struct huffman_node
@@ -99,9 +100,9 @@ public:
 		traverse(root, "");
 	}
 
-	vector<string> encode()
+	string encode()
 	{
-		vector<string> encode;
+		string encode;
 		create_pq();
 		create_huffman_tree();
 		calculate_huffman_codes();
@@ -109,12 +110,63 @@ public:
 		in_file.get(id);
 		while (!in_file.eof())
 		{
-			encode.push_back(charCode[id]);
+			encode += charCode[id];
 			in_file.get(id);
 		}
 		in_file.close();
 
 		return encode;
+	}
+
+	//vector<bool> boolVector(const vector<string> code)
+	//{
+	//	vector<bool> compress;
+	//	for (int i = 0; i < code.size(); i++)
+	//	{
+	//		for (int j = 0; j < code[i].size(); j++)
+	//		{
+	//			if(code[i][j]== '0')
+	//				compress.push_back(0);
+	//			else if(code[i][j]== '1')
+	//				compress.push_back(1);
+	//		}
+	//	}
+	//	return compress;
+	//}
+
+	string compress(const string code)
+	{
+		string compressed;
+		string str;
+		str.clear();
+		for (auto c : code)
+		{
+			str.push_back(c);
+			if (str.size() == 8)
+			{
+				int dec = bitset<8>(str).to_ulong();
+				compressed.push_back(char(dec));
+				str.clear();
+			}
+		}
+		return compressed;
+	}
+
+	void printTotxt(const string compressed)
+	{
+		out_file.open("encoded.txt");
+		map<char,int> :: iterator it= charFreq.begin();
+		for (it; it!=charFreq.end(); it++)
+		{
+			out_file << it->first;
+			out_file << it->second;
+		}
+		
+		for (int i = 0; i < compressed.size(); i++)
+		{
+			out_file << compressed[i];
+		}
+		out_file.close();
 	}
 };
 
