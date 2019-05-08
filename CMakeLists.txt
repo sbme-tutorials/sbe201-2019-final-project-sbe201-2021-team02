@@ -1,11 +1,14 @@
-cmake_minimum_required(VERSION 3.14)
-project(sbe201_2019_final_project_sbe201_2021_team02)
+cmake_minimum_required(VERSION 3.10.2 )
 
-set(CMAKE_CXX_STANDARD 14)
+### c++11 standards
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-include_directories(.)
+project( huffman_compression )
 
-add_executable(sbe201_2019_final_project_sbe201_2021_team02
-        huffman.hpp
-        huffmanCoding.cpp
-        huffmanDecoding.cpp)
+include_directories( include )
+
+add_executable( compress apps/test_huffman_code.cpp )
+add_executable( decompress apps/test_huffman_decode.cpp )
+
