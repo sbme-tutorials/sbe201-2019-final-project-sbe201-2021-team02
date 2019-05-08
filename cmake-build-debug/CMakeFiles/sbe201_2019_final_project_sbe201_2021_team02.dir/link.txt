@@ -1,1 +1,0 @@
-/usr/bin/c++  -g   CMakeFiles/sbe201_2019_final_project_sbe201_2021_team02.dir/huffmanCoding.cpp.o CMakeFiles/sbe201_2019_final_project_sbe201_2021_team02.dir/huffmanDecoding.cpp.o  -o sbe201_2019_final_project_sbe201_2021_team02 
