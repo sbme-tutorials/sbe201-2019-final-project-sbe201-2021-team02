@@ -64,9 +64,9 @@ public:
 		}
 	}
 
-	node_ptr create_huffman_tree()
+	node_ptr create_huffman_tree(priority_queue<node_ptr, vector<node_ptr>, compare> &q)
 	{
-		priority_queue<node_ptr, vector<node_ptr>, compare> temp(pq);
+		priority_queue<node_ptr, vector<node_ptr>, compare> temp(q);
 		while (temp.size() > 1)
 		{ //create the huffman tree with highest frequecy characher being leaf from bottom to top
 			root = new huffman_node;
@@ -105,7 +105,7 @@ public:
 		string encode;
 		create_pq();
 		typedef huffman_node *node_ptr;
-		create_huffman_tree();
+		create_huffman_tree(pq);
 		calculate_huffman_codes();
 		in_file.open(in_file_name, ios::in);
 		in_file.get(id);
@@ -129,9 +129,7 @@ public:
 			str.push_back(c);
 			if (str.size() == 8)
 			{
-				int dec = bitset<8>(str).to_ulong();
-				unsigned char chr = (unsigned char)dec;
-
+				char chr = bitset<8>(str).to_ulong();
 				compressed.push_back(chr);
 				str.clear();
 			}
@@ -164,61 +162,55 @@ public:
 	{
 		map<char, int> freqMAp;
 		string v;
-		v.clear();
 		char k;
 		in_file.open(in_file_name, ios::in);
-		in_file.get(id);
+
 		while (id != '$')
 		{
-			while (id != '%')
-			{
+			in_file.get(id);
+			if (id == '$')
+				break;
+
+			if (id == '%')
+				continue;
+			else
 				k = id;
-				in_file.get(id);
-			}
-			while (id != '^')
+
+			in_file.get(id);
+			in_file.get(id);
+			while (id >= '0' && id <= '9')
 			{
+				if (id == '%' || id == '^')
+					break;
+
 				v += id;
 				in_file.get(id);
 			}
-			int freq = stoi(v);
-			freqMAp.insert(pair<char, int>(k, freq));
+			int freq = 0;
+			if (v.size() > 0)
+			{
+				freq = stoi(v);
+				freqMAp.insert(pair<char, int>(k, freq));
+			}
 			v.clear();
-			in_file.get(id);
 		}
 		in_file.close();
 
 		return freqMAp;
 	}
 
-	void recalculate_huffman_codes()
+	node_ptr recalculate_huffman_codes()
 	{
+		priority_queue<node_ptr, vector<node_ptr>, compare> q;
 		map<char, int> freqMap = getMap();
 		for (auto &[k, v] : freqMap)
 		{
 			node_ptr temp = new huffman_node;
 			temp->id = k;
 			temp->freq = v;
-			pq.push(temp);
+			q.push(temp);
 		}
-		create_huffman_tree();
-		calculate_huffman_codes();
-	}
-
-	string decimal_to_binary(int in)
-	{
-		string temp = "";
-		string result = "";
-		while (in)
-		{
-			temp += ('0' + in % 2);
-			in /= 2;
-		}
-		result.append(8 - temp.size(), '0'); //append '0' ahead to let the result become fixed length of 8
-		for (int i = temp.size() - 1; i >= 0; i--)
-		{
-			result += temp[i];
-		}
-		return result;
+		return create_huffman_tree(q);
 	}
 
 	string decode()
@@ -231,68 +223,46 @@ public:
 		{
 			in_file.get(id);
 		}
-	
+		in_file.get(id);
+
 		while (!in_file.eof())
 		{
 			in_file.get(id);
-	
-			str += decimal_to_binary(int(id));
+			bitset<8> chr = id;
+			str += chr.to_string();
 		}
 		return str;
 	}
 
 	void decompress(node_ptr node, string code)
 	{
-		recalculate_huffman_codes();
 		out_file.open("decoded.txt");
 
 		int i = 0;
+		node_ptr current = node;
 		while (i < code.size())
 		{
-			node_ptr current = node;
-
-			while ((node->right != NULL && node->left != NULL) && i < code.size())
+			if (current->left == NULL && current->right == NULL)
 			{
-				if (code[i] == '0')
-				{
-					current = current->left;
-					++i;
-				}
-				else if (code[i] == '1')
-				{
-					current = current->right;
-					++i;
-				}
+				out_file << current->id;
+				current = node;
 			}
-			out_file << current->id;
+			if (code[i] == '1')
+				current = current->right;
+			else if (code[i] == '0')
+				current = current->left;
+
+			++i;
 		}
 		out_file.close();
 	}
 
 	void backToOriginal()
 	{
-		recalculate_huffman_codes();
-		decompress(root, decode());
+		node_ptr temp;
+		temp = recalculate_huffman_codes();
+		decompress(temp, decode());
 	}
-
-	//string DecToBin(const char code)
-	//{
-	//	string binary = bitset<8>(code).to_string();
-	//	return binary;
-	//}
-	//
-	//static vector<char> ReadAllBytes(char const *filename)
-	//{
-	//	ifstream ifs(filename, ios::binary | ios::ate);
-	//	ifstream::pos_type pos = ifs.tellg();
-	//
-	//	std::vector<char> result(pos);
-	//
-	//	ifs.seekg(0, ios::beg);
-	//	ifs.read(&result[0], pos);
-	//
-	//	return result;
-	//}
 };
 
 #endif

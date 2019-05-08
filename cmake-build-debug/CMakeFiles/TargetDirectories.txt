@@ -1,0 +1,3 @@
+/home/mostafa45/Downloads/team tasks/sbe201-2019-final-project-sbe201-2021-team02/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/mostafa45/Downloads/team tasks/sbe201-2019-final-project-sbe201-2021-team02/cmake-build-debug/CMakeFiles/sbe201_2019_final_project_sbe201_2021_team02.dir
+/home/mostafa45/Downloads/team tasks/sbe201-2019-final-project-sbe201-2021-team02/cmake-build-debug/CMakeFiles/edit_cache.dir
